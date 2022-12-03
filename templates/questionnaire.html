@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{ questionnaire.title }}
+{% endblock title %}
+
+{% block content %}
+  <h1>ML Settings</h1>
+  <div>
+    <label for="length">Question Length (Characters):</label>
+    <input type="number" id="length" name="length" min="10" value="80" step="10">
+  </div>
+  <div>
+    <label for="template"> Select a string template</label>
+    <select name="template", id="template">
+    {% for t in templates %}
+      <option value="{{ t }}">{{ t }}</option>
+    {% endfor %}
+    </select>
+  </div>
+  <div id="radio_amount">
+    <fieldset>
+      <legend>Previous Answers to Consider?:</legend>
+      <input type="radio" name="amount" value="All" checked="checked">All<br>
+      <input type="radio" name="amount" value="Other"><input type="number" id="other_amount" name="other_amount" min="1" max="81" value="3" step="5">  
+  </fieldset>
+  
+    
+  </div>
+  <h1>{{ questionnaire.title }}</h1>
+  <p>{{ questionnaire.comment }}</p>
+  {% include "form.html" %}
+{% endblock content %}

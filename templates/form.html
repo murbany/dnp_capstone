@@ -1,0 +1,88 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>
+  function predict(clicked_id) {
+    var data = $("#survey").serializeArray();
+    data.push({name: "id", value: clicked_id});
+    data.push({name: "length", value: $("#length").val()});
+    data.push({name: "template", value: $("#template").val()});
+    
+    var selectedRadio = $('#radio_amount input[name=amount]:checked', ).val();
+    if (selectedRadio == "Other") {
+      selectedRadio = $("#other_amount").val();
+    }
+    data.push({name: "previous_questions", value: selectedRadio});
+    $(".context").each(function() {
+      data.push({name: $(this).attr("id"), value: $(this).text()});
+    });
+
+    $.ajax({
+        url: "{{ url_for('survey.predict', slug=slug) }}",// + "?&qid=" + clicked_id,
+        type: "post",
+        data:  data,
+        success: function(response) {
+          var ctx = document.getElementById(clicked_id+"_context");
+          ctx.innerHTML=response;
+        },
+        error: function(xhr) {
+          alert('Error');
+        }
+    })
+  }
+</script>
+<form id="survey" action="{{ url_for('survey.questionnaire', slug=slug) }}" method="POST">
+  {% for q in questionnaire.questions %}
+    {% set qloop = loop %}
+    {% set qid = "q{0}".format(loop.index0) %}
+    <div class="question">
+      <label for="{{ qid }}">
+        <span class="question-title">{{ q.label }}</span>
+        {% if q.required %}
+          <sup>*</sup>
+        {% endif %}
+        {% if q.error %}
+          <span class="error">
+            {{ questionnaire.messages.error.required }}
+          </span>
+        {% endif %}
+      </label>
+      <p>
+        {% if q.help %}
+          {{ q.help }}
+        {% endif %}
+      </p>
+      {% if q.context %}
+      <div>
+        <p id="{{ qid }}_context" class="context">
+          Press the button to generate context-dependent questions
+        </p>
+      </div>
+        <div style="display: flex; margin: 5px;">
+          <button class="predict" id="{{ qid }}" type="button" style="margin-left: 5px;" onclick="predict(this.id)">Generate Questions</button>
+        </div>
+      {% endif %}
+      <div>
+        {% if q.type == "text" %}
+          <textarea id="{{ qid }}" name={{ qid }}>{{ q.value }}</textarea>
+        {% elif q.type == "string" %}
+          <input id="{{ qid }}" type="text" name="q{{ qloop.index0 }}" value="{{ q.value }}">
+        {% elif q.type in ("radio", "checkbox") %}
+          <ul class="options">
+            {% for opt in q.options %}
+              <li>
+                {% set checked = "checked" if opt == q.value or opt in q.get('values', []) else "" %}
+                <label>
+                  <input name="{{ qid }}" type="{{ q.type }}" value="{{ opt }}" {{ checked }}>
+                  <span>{{ opt }}</span>
+                </label>
+                {% if opt == q.other_option %}
+                  <input type="text" name="{{ qid }}.{{ opt }}.other" value={{ q.other_value }}>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  <input type="submit" name="submit" value="{{ questionnaire.submit }}">
+</form>
