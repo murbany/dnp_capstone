@@ -1,5 +1,9 @@
-Flask==1.0
-itsdangerous==0.24
-Jinja2==2.11.3
-MarkupSafe==0.23
-Werkzeug==0.15.4
+Flask==2.2.2
+itsdangerous==2.1.2
+Jinja2==3.1.2
+MarkupSafe==2.1.1
+Werkzeug==2.2.2
+-i https://download.pytorch.org/whl/cu113
+torch==1.11.0+cu113
+torchvision==0.11.2+cu113
+torchaudio==0.10.1+cu113
