@@ -3,8 +3,8 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.1
 Werkzeug==2.2.2
-# -f https://download.pytorch.org/whl/cu113/torch_stable.html
+-f https://download.pytorch.org/whl/cu113/torch_stable.html
 # --extra-index-url https://download.pytorch.org/whl/cu113
-# torch==1.10.1+cu113
-# torchvision==0.11.2+cu113
-# torchaudio==0.10.1+cu113
+torch==1.10.1+cu113
+torchvision==0.11.2+cu113
+torchaudio==0.10.1+cu113
