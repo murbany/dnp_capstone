@@ -12,18 +12,18 @@ import load_model
 
 global graph, model
 
-global survey
+global survey_form
 
 with open('./questionnaires/dataset_survey.json') as f:
-    survey = json.load(f)
-    survey = survey["questions"]
+    survey_form = json.load(f)
+    survey_form = survey_form["questions"]
     temp_survey = {}
-    for i, q in enumerate(survey):
+    for i, q in enumerate(survey_form):
         temp_survey[i] = {
             'question': q["label"],
             'helper': q.get("help", "")
         }
-    survey = temp_survey
+    survey_form = temp_survey
 
 model, tokenizer = load_model.init()
 
@@ -257,7 +257,7 @@ def predict(slug):
     qid = None
     length = None
     prev_q = None
-    survey_data = defaultdict(lambda: None)
+    survey_response = defaultdict(lambda: None)
     form = request.form
 
     for name, values in form.lists():
@@ -281,7 +281,7 @@ def predict(slug):
         if name == "previous_questions":
             prev_q = values[0]
             if prev_q == 'All':
-                prev_q = len(survey.items())
+                prev_q = len(survey_form.items())
             else:
                 prev_q = int(prev_q)
             continue
@@ -291,7 +291,7 @@ def predict(slug):
             contexts = list(filter(any,
                     ((s.strip(), form.get('%s.%s.other' % (name, s.strip())))
                         for s in values)))
-            survey_data[n].update({
+            survey_response[n].update({
                 "context": contexts[0][0] if contexts else ""
             })
         else:
@@ -299,7 +299,7 @@ def predict(slug):
             responses = list(filter(any,
                     ((s.strip(), form.get('%s.%s.other' % (name, s.strip())))
                         for s in values)))
-            survey_data[n] = {
+            survey_response[n] = {
                 "response": responses[0][0] if responses else ""
             }
     
@@ -307,20 +307,20 @@ def predict(slug):
 
     if qid == 0:
         prompt += template["last_chunk"].format(
-            question = survey[qid]["question"],
-            helper = survey[qid]["helper"],
-            response = survey_data[qid]["response"],
+            question = survey_form[qid]["question"],
+            helper = survey_form[qid]["helper"],
+            response = survey_response[qid]["response"],
         )
     elif qid == 1:
         prompt += template["chunk"].format(
-            question = survey[qid-1]["question"],
-            helper = survey[qid-1]["helper"],
-            response = survey_data[qid-1]["response"],
+            question = survey_form[qid-1]["question"],
+            helper = survey_form[qid-1]["helper"],
+            response = survey_response[qid-1]["response"],
         )
         prompt += template["last_chunk"].format(
-            question = survey[qid]["question"],
-            helper = survey[qid]["helper"],
-            response = survey_data[qid]["response"],
+            question = survey_form[qid]["question"],
+            helper = survey_form[qid]["helper"],
+            response = survey_response[qid]["response"],
         )
     else:
         print('))))))))))))))))))))))))))))')
@@ -328,14 +328,14 @@ def predict(slug):
         for i in range(max(qid-prev_q, 0), qid-1):
             print(i)
             prompt += template["chunk"].format(
-                question = survey[i]["question"],
-                helper = survey[i]["helper"],
-                response = survey_data[i]["response"],
+                question = survey_form[i]["question"],
+                helper = survey_form[i]["helper"],
+                response = survey_response[i]["response"],
             )
         prompt += template["last_chunk"].format(
-            question = survey[qid]["question"],
-            helper = survey[qid]["helper"],
-            response = survey_data[qid]["response"],
+            question = survey_form[qid]["question"],
+            helper = survey_form[qid]["helper"],
+            response = survey_response[qid]["response"],
         )
 
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.cuda()
