@@ -7,6 +7,7 @@ curdir = os.path.abspath(os.path.dirname(__file__))
 QUESTIONNAIRE_DIR = os.path.join(curdir, 'questionnaires')
 QUESTIONNAIRE_SUBMISSIONS_DIR = os.path.join(curdir, 'submissions')
 
+
 QUESTIONNAIRE_BASIC_AUTH = ('admin', 'secret')
 
 QUESTIONNAIRE_DEFAULTS = {
