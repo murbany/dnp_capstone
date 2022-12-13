@@ -356,4 +356,4 @@ def predict(slug):
     print(len(context), len(prompt))
     sdir = os.path.join(_get_option('SUBMISSIONS_DIR'), slug)
     print(sdir)
-    return context
+    return sdir + ' XXXXXXX ' + context
