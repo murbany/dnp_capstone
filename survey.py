@@ -136,7 +136,8 @@ def _write_submission(data, slug):
     sdir = os.path.join(_get_option('SUBMISSIONS_DIR'), slug)
     try:
         os.makedirs(sdir)
-    except OSError:
+    except OSError as e:
+        print(e)
         pass
     timestamp = datetime.now().strftime(SUBMISSION_DATEFMT)
     sfile = os.path.join(sdir, timestamp + '.json')
@@ -352,5 +353,7 @@ def predict(slug):
         prompt = prompt[prompt_size-8999:]
     context = generator(prompt, do_sample=True, max_new_tokens=length, max_length=None)[0]['generated_text'][len(prompt):]
     
-    # print(len(context), len(prompt))
+    print(len(context), len(prompt))
+    sdir = os.path.join(_get_option('SUBMISSIONS_DIR'), slug)
+    print(sdir)
     return context
