@@ -22,7 +22,7 @@
         </th>
       </thead>
 
-      {% for d, s in submissions.iteritems() | sort %}
+      {% for d, s in submissions.items() | sort %}
         <tr>
           {% for q in questionnaire.questions %}
             <td>

@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import wraps
 import json
 import os
+import errno
 
 from flask import abort, Blueprint, render_template, request, Response
 from flask import current_app as app
@@ -118,14 +119,14 @@ def _get_submissions(slug):
     try:
         dirlist = os.listdir(sdir)
     except EnvironmentError as e:
-        if e.errno != os.errno.ENOENT:
+        if e.errno != errno.ENOENT:
             raise
         dirlist = []
     for subm in filter(lambda s: s.endswith('.json'), dirlist):
             with open(os.path.join(sdir, subm)) as f:
                 data = json.load(f)
                 data = dict(((int(i), [tuple(v) for v in vs])
-                             for i, vs in data.iteritems()))
+                             for i, vs in data.items()))
                 dt = datetime.strptime(subm[:-5], SUBMISSION_DATEFMT)
                 submissions[dt] = data
     return submissions
