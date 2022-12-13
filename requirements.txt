@@ -10,4 +10,4 @@ Werkzeug==2.2.2
 # torch
 # torchvision
 # torchaudio
-# transformers
+transformers[torch]
