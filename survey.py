@@ -139,8 +139,10 @@ def _write_submission(data, slug):
         pass
     timestamp = datetime.now().strftime(SUBMISSION_DATEFMT)
     sfile = os.path.join(sdir, timestamp + '.json')
+    print(sfile)
     with open(sfile, 'w') as f:
         json.dump(data, f, indent=4)
+    print('written')
 
 
 # HTTP Basic Auth
