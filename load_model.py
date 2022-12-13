@@ -1,5 +1,5 @@
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoTokenizer, pipeline
+# import torch
+from transformers import pipeline
 
 def init():
     # model = AutoModelForCausalLM.from_pretrained('facebook/opt-125m', torch_dtype=torch.float16)
