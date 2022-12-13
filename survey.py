@@ -338,7 +338,7 @@ def predict(slug):
             response = survey_response[qid]["response"],
         )
 
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.cuda()
+    input_ids = tokenizer(prompt, return_tensors="pt").input_ids
     generated_ids = model.generate(input_ids, do_sample=True, max_new_tokens=length)
     context = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0][len(prompt):]
     
