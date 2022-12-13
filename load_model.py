@@ -1,9 +1,11 @@
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoTokenizer, pipeline
 
 def init():
-    model = AutoModelForCausalLM.from_pretrained('facebook/opt-125m', torch_dtype=torch.float16)
-    tokenizer = AutoTokenizer.from_pretrained("facebook/opt-125m", use_fast=False)
+    # model = AutoModelForCausalLM.from_pretrained('facebook/opt-125m', torch_dtype=torch.float16)
+    # tokenizer = AutoTokenizer.from_pretrained("facebook/opt-125m", use_fast=False)
+    generator = pipeline('text-generation', model='facebook/opt-125m')
 
-    return model, tokenizer
+    # return model, tokenizer, generator
+    return generator
     

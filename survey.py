@@ -10,7 +10,8 @@ from flask import current_app as app
 
 import load_model
 
-global graph, model
+# global model, tokenizer, generator
+global generator
 
 global survey_form
 
@@ -25,7 +26,8 @@ with open('./questionnaires/dataset_survey.json') as f:
         }
     survey_form = temp_survey
 
-model, tokenizer = load_model.init()
+# model, tokenizer, generator = load_model.init()
+generator = load_model.init()
 
 QUESTIONNAIRE_DEFAULTS = {
     "submit": "Submit",
@@ -338,11 +340,14 @@ def predict(slug):
             response = survey_response[qid]["response"],
         )
 
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids
-    generated_ids = model.generate(input_ids, do_sample=True, max_new_tokens=length)
-    context = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0][len(prompt):]
+    # input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+    # generated_ids = model.generate(input_ids, do_sample=True, max_new_tokens=length)
+    # context = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0][len(prompt):]
+    # print(len(prompt))
+    prompt_size = len(prompt)
+    if prompt_size > 9000:
+        prompt = prompt[prompt_size-8999:]
+    context = generator(prompt, do_sample=True, max_new_tokens=length, max_length=None)[0]['generated_text'][len(prompt):]
     
-    print(prompt)
-    print(context)
     # print(len(context), len(prompt))
     return context
