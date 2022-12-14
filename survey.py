@@ -137,14 +137,11 @@ def _write_submission(data, slug):
     try:
         os.makedirs(sdir)
     except OSError as e:
-        print(e)
         pass
     timestamp = datetime.now().strftime(SUBMISSION_DATEFMT)
     sfile = os.path.join(sdir, timestamp + '.json')
-    print(sfile)
     with open(sfile, 'w') as f:
         json.dump(data, f, indent=4)
-    print('written')
 
 
 # HTTP Basic Auth
@@ -176,7 +173,7 @@ def requires_auth(f):
 
 
 @survey.route('/')
-@requires_auth
+# @requires_auth
 def index():
     dir_ = _get_option('DIR')
     qs = map(lambda s: (s[:-5], _get_questionnaire_data(s[:-5])),
@@ -248,7 +245,7 @@ def questionnaire(slug):
 
 
 @survey.route('/<slug>/results', methods=['GET'])
-@requires_auth
+# @requires_auth
 def results(slug):
     data = _get_questionnaire_data(slug)
     submissions = _get_submissions(slug)
@@ -329,8 +326,6 @@ def predict(slug):
             response = survey_response[qid]["response"],
         )
     else:
-        print('))))))))))))))))))))))))))))')
-        print(range(max(qid-prev_q, 0), qid-1))
         for i in range(max(qid-prev_q, 0), qid-1):
             print(i)
             prompt += template["chunk"].format(
@@ -344,16 +339,9 @@ def predict(slug):
             response = survey_response[qid]["response"],
         )
 
-    # input_ids = tokenizer(prompt, return_tensors="pt").input_ids
-    # generated_ids = model.generate(input_ids, do_sample=True, max_new_tokens=length)
-    # context = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0][len(prompt):]
-    # print(len(prompt))
     prompt_size = len(prompt)
     if prompt_size > 9000:
         prompt = prompt[prompt_size-8999:]
     context = generator(prompt, do_sample=True, max_new_tokens=length, max_length=None)[0]['generated_text'][len(prompt):]
     
-    print(len(context), len(prompt))
-    sdir = os.path.join(_get_option('SUBMISSIONS_DIR'), slug)
-    print(sdir)
-    return sdir + ' XXXXXXX ' + context
+    return context
