@@ -2,29 +2,41 @@
 <script>
   function predict(clicked_id) {
     var data = $("#survey").serializeArray();
+    var qid = clicked_id.split('_')[0];
     data.push({name: "id", value: clicked_id});
-    data.push({name: "length", value: $("#length").val()});
-    data.push({name: "template", value: $("#template").val()});
+    // data.push({name: "length", value: $("#length").val()});
+    // data.push({name: "template", value: $("#template").val()});
     
-    var selectedRadio = $('#radio_amount input[name=amount]:checked', ).val();
-    if (selectedRadio == "Other") {
-      selectedRadio = $("#other_amount").val();
-    }
-    data.push({name: "previous_questions", value: selectedRadio});
+    // var selectedRadio = $('#radio_amount input[name=amount]:checked', ).val();
+    // if (selectedRadio == "Other") {
+    //   selectedRadio = $("#other_amount").val();
+    // }
+    // data.push({name: "previous_questions", value: selectedRadio});
     $(".context").each(function() {
-      data.push({name: $(this).attr("id"), value: $(this).text()});
+      data.push({name: qid, value: $(this).text()});
     });
 
+    var loading_gif = document.getElementById(qid+"_loading");
+    loading_gif.style.display = 'block';
+
+    var pred_button = document.getElementById(qid+"_predict");
+    pred_button.disabled = true;
+
     $.ajax({
-        url: "{{ url_for('survey.predict', slug=slug) }}",// + "?&qid=" + clicked_id,
+        url: "{{ url_for('survey.predict', slug=slug) }}",// + "?&qid=" + qid,
         type: "post",
         data:  data,
         success: function(response) {
-          var ctx = document.getElementById(clicked_id+"_context");
+          var ctx = document.getElementById(qid+"_context");
           ctx.innerHTML=response;
+          loading_gif.style.display = 'none';
+          pred_button.disabled = false;
         },
         error: function(xhr) {
+          loading_gif.style.display = 'none';
+          pred_button.disabled = false;
           alert('Error');
+          
         }
     })
   }
@@ -50,17 +62,18 @@
           {{ q.help }}
         {% endif %}
       </p>
-      {% if q.context %}
       <div>
-        <p id="{{ qid }}_context" class="context">
-          Press the button to generate context-dependent questions
-        </p>
-      </div>
-        <div style="display: flex; margin: 5px;">
-          <button class="predict" id="{{ qid }}" type="button" style="margin-left: 5px;" onclick="predict(this.id)">Generate Questions</button>
+        {% if q.context %}
+        <div>
+          <textarea id="{{ qid }}_context" class="context" name="{{ qid }}_context">
+            Press the button to generate context-dependent questions
+          </textarea>
+          <img src="../static/images/loading.gif" id="{{ qid }}_loading" style="display: None;">
         </div>
-      {% endif %}
-      <div>
+        <div style="display: flex; margin: 5px;">
+          <button class="predict" id="{{ qid }}_predict" type="button" style="margin-left: 5px;" onclick="predict(this.id)">Generate Questions</button>
+        </div>
+        {% endif %}
         {% if q.type == "text" %}
           <textarea id="{{ qid }}" name={{ qid }}>{{ q.value }}</textarea>
         {% elif q.type == "string" %}

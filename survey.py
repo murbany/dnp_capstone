@@ -16,7 +16,7 @@ global generator
 
 global survey_form
 
-with open('./questionnaires/dataset_survey.json') as f:
+with open('./questionnaires/_dataset_survey.json') as f:
     survey_form = json.load(f)
     survey_form = survey_form["questions"]
     temp_survey = {}
@@ -191,22 +191,31 @@ def questionnaire(slug):
         return render_template(template, questionnaire=data, slug=slug, templates = os.listdir('./string_templates'))
     else:
         submissions = defaultdict(lambda: tuple(None, None))
+        contexts = defaultdict(lambda: tuple(None, None))
         form = request.form
         for name, values in form.lists():
             if name == 'submit' or name.endswith('.other') or name=='predict':
                 continue
-            valid = name.startswith('q')
-            if valid:
-                try:
+
+            if name.startswith('q'):
+                if name.endswith('context'):
+                    n = name
+                else:
                     n = int(name[1:None])
-                except ValueError:
-                    valid = False
-            if not valid:
-                app.logger.info('invalid parameter: %s', name)
-                return "invalid submission parameters", 400
-            submissions[n] = list(filter(any,
-                ((s.strip(), form.get('%s.%s.other' % (name, s.strip())))
-                 for s in values)))
+                submissions[n] = list(filter(any,
+                    ((s.strip(), form.get('%s.%s.other' % (name, s.strip())))
+                    for s in values)))
+
+            # valid = name.startswith('q')
+            # if valid:
+            #     try:
+            #         n = int(name[1:None])
+            #     except ValueError:
+            #         valid = False
+            # if not valid:
+            #     app.logger.info('invalid parameter: %s', name)
+            #     return "invalid submission parameters", 400
+           
 
         error = False
         errormsgs = data['messages']['error']
@@ -230,7 +239,7 @@ def questionnaire(slug):
                 other_vals = filter(None, (o for v, o in s if v == other_opt))
                 if other_vals:
                     q['other_value'] = other_vals[0]
-            # validate option values
+            # validate option values                          
             invalid = (bool(values) and 'options' in q and
                        any(True for v in values if v not in q['options']))
             if invalid:
@@ -254,12 +263,12 @@ def results(slug):
                            submissions=submissions)
 
 @survey.route('/<slug>/predict', methods=['POST'])
-def predict(slug):
-    # data = _get_questionnaire_data(slug)
-    # submissions = _get_submissions(slug)
+def predict(slug):                                             
     qid = None
-    length = None
-    prev_q = None
+    length = 200
+    prev_q = 6
+    with open('./string_templates/' + 'simple_template.json') as f:
+        template = json.load(f)
     survey_response = defaultdict(lambda: None)
     form = request.form
 
@@ -268,25 +277,25 @@ def predict(slug):
             continue
 
         if name == "id":
-            qid = int(values[0][1:None])
+            qid = int(values[0].split('_')[0][1:None])
             continue
 
         if name == "length":
-            length = int(values[0])
+            # length = int(values[0])
             continue
             
         if name == "template":
-            template = values[0].split('\\')[-1]
-            with open('./string_templates/' + template) as f:
-                template = json.load(f)
+            # template = values[0].split('\\')[-1]
+            # with open('./string_templates/' + template) as f:
+            #     template = json.load(f)
             continue
 
         if name == "previous_questions":
-            prev_q = values[0]
-            if prev_q == 'All':
-                prev_q = len(survey_form.items())
-            else:
-                prev_q = int(prev_q)
+            # prev_q = values[0]
+            # if prev_q == 'All':
+            #     prev_q = len(survey_form.items())
+            # else:
+            #     prev_q = int(prev_q)
             continue
         
         if name.endswith("_context"):
@@ -327,7 +336,6 @@ def predict(slug):
         )
     else:
         for i in range(max(qid-prev_q, 0), qid-1):
-            print(i)
             prompt += template["chunk"].format(
                 question = survey_form[i]["question"],
                 helper = survey_form[i]["helper"],
