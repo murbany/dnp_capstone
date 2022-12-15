@@ -269,7 +269,7 @@ def predict(slug):
     prev_q = 6
     with open('./string_templates/' + 'simple_template.json') as f:
         template = json.load(f)
-    survey_response = defaultdict(lambda: None)
+    survey_response = {}
     form = request.form
 
     for name, values in form.lists():
@@ -298,15 +298,7 @@ def predict(slug):
             #     prev_q = int(prev_q)
             continue
         
-        if name.endswith("_context"):
-            n = int(name[1:2])
-            contexts = list(filter(any,
-                    ((s.strip(), form.get('%s.%s.other' % (name, s.strip())))
-                        for s in values)))
-            survey_response[n].update({
-                "context": contexts[0][0] if contexts else ""
-            })
-        else:
+        if not name.endswith("_context"):
             n = int(name[1:None])
             responses = list(filter(any,
                     ((s.strip(), form.get('%s.%s.other' % (name, s.strip())))
